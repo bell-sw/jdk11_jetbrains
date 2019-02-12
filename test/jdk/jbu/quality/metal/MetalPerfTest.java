@@ -33,15 +33,16 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MetalPerfTest {
-    private static final int N = 100;
-    private static final float WIDTH = 800;
-    private static final float HEIGHT = 800;
-    private static final float R = 25;
-    private static final int BW = 50;
-    private static final int BH = 50;
-    private static final int COUNT = 100;
-    private static final int DELAY = 10;
-    private static final int RESOLUTION = 5;
+    private final static int N = 10;
+    private final static float WIDTH = 800;
+    private final static float HEIGHT = 800;
+    private final static float R = 25;
+    private final static int BW = 50;
+    private final static int BH = 50;
+    private final static int COUNT = 50;
+    private final static int DELAY = 10;
+    private final static int RESOLUTION = 5;
+    private final static int COLOR_TOLERANCE = 10;
 
 
 
@@ -193,7 +194,7 @@ public class MetalPerfTest {
                 if (waiting.compareAndSet(false, true)) {
                     Color c = robot.getPixelColor(panel.getTopLevelAncestor().getX() + 25,
                             panel.getTopLevelAncestor().getY() + 25);
-                    if (c.equals(Color.BLUE)) {
+                    if (isAlmostEqual(c, Color.BLUE)) {
                         expColor = Color.RED;
                     } else {
                         expColor = Color.BLUE;
@@ -202,9 +203,11 @@ public class MetalPerfTest {
                     panel.getParent().repaint();
 
                 } else {
-                    while (!expColor.equals(
-                            robot.getPixelColor(panel.getTopLevelAncestor().getX() + BW/2,
-                                    panel.getTopLevelAncestor().getY() + BW/2)))
+                    while (!isAlmostEqual(
+                            robot.getPixelColor(
+                                    panel.getTopLevelAncestor().getX() + BW / 2,
+                                    panel.getTopLevelAncestor().getY() + BH / 2),
+                            expColor))
                     {
                         try {
                             Thread.sleep(RESOLUTION);
@@ -230,6 +233,13 @@ public class MetalPerfTest {
 
             latchFrame.await();
             return 1e9/(execTime / frame);
+        }
+
+        private boolean isAlmostEqual(Color c1, Color c2) {
+            return Math.abs(c1.getRed() - c2.getRed()) < COLOR_TOLERANCE ||
+                    Math.abs(c1.getGreen() - c2.getGreen()) < COLOR_TOLERANCE ||
+                    Math.abs(c1.getBlue() - c2.getBlue()) < COLOR_TOLERANCE;
+
         }
     }
 
