@@ -28,7 +28,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class RenderUtil {
-
+    final static int TOLERANCE = 20;
 
     public static BufferedImage capture(int width, int height, Consumer<Graphics2D> painter)
             throws Exception
@@ -55,7 +55,7 @@ public class RenderUtil {
 
         Rectangle screenRect;
         Robot r = new Robot();
-        while (!Color.black.equals(r.getPixelColor(p[0].x, p[0].y))) {
+        while (!Color.black.equals(r.getPixelColor(p[0].x+1, p[0].y))) {
             Thread.sleep(100);
         }
         screenRect = new Rectangle(
@@ -134,7 +134,7 @@ public class RenderUtil {
                         rRaster.getPixel(i, j, rArr);
                         assertTrue(gArr.length == rArr.length);
                         for (int k = 0; k < gArr.length; k++) {
-                            if (gArr[k] != rArr[k]) {
+                            if (Math.abs(gArr[k] - rArr[k]) > TOLERANCE) {
                                 failureReason.append(variant).append(" : Different pixels found ").
                                         append("at (").append(i).append(",").append(j).append(")");
                                 failed = true;
