@@ -75,15 +75,18 @@ test.dependsOn tasks.compileTestJava
 
 test {
     systemProperty "jb.java2d.metal", "true"
-    systemProperty "testdata", file('../../../jb/tests/testdata').absolutePath
+    systemProperty "testdata", file('../../../test/jdk/jbu/testdata').absolutePath
 
 //  Generate golden images for DroidFontTest and MixedTextTest
 //    systemProperty "gentestdata", ""
 
+//  Enable Java2D logging (https://confluence.jetbrains.com/display/JRE/Java2D+Rendering+Logging)
+//  systemProperty "sun.java2d.trace", "log"
+
     outputs.upToDateWhen { false }
     executable = test_jvm()
 
-//  Enable J2D logging (only in debug build)
+//  Enable native J2D logging (only in debug build)
 //  Can be turned on for J2D by adding "#define DEBUG 1" into jdk/src/share/native/sun/java2d/Trace.h
 
 //    environment 'J2D_TRACE_LEVEL', '4'
@@ -96,12 +99,14 @@ if (OperatingSystem.current().isWindows()) {
     def cyg_make_cmd = new File("c:/cygwin64/bin/make.exe")
     if (cyg_make_cmd.exists()) make_cmd = cyg_make_cmd.absolutePath
 }
-
+def test_run = false
 task make_images << {
-    def pb = new ProcessBuilder().command(make_cmd.toString(), "-C", buildDir.absolutePath, "images")
-    def proc = pb.redirectErrorStream(true).start()
-    proc.inputStream.eachLine {println it}
-    assert proc.waitFor() == 0
+    if (!test_run) {
+        def pb = new ProcessBuilder().command(make_cmd.toString(), "-C", buildDir.absolutePath, "images")
+        def proc = pb.redirectErrorStream(true).start()
+        proc.inputStream.eachLine { println it }
+        assert proc.waitFor() == 0
+    }
 }
 
 task make_clean << {
@@ -111,9 +116,12 @@ task make_clean << {
     assert proc.waitFor() == 0
 }
 
+task run_test << {
+    test_run = true
+}
 
-tasks.compileJava.enabled = false
-tasks.compileTestJava.dependsOn.clear()
+tasks.cleanTest.dependsOn tasks.run_test
 classes.dependsOn.clear()
 classes.dependsOn tasks.make_images
+processResources.dependsOn tasks.make_images
 tasks.cleanClasses.dependsOn tasks.make_clean
