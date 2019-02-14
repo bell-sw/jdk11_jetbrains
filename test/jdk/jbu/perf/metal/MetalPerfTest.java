@@ -21,7 +21,7 @@
  * questions.
  */
 
-package quality.metal;
+package perf.metal;
 
 import org.junit.Test;
 
@@ -33,13 +33,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MetalPerfTest {
-    private final static int N = 10;
+    private final static int N = 50;
     private final static float WIDTH = 800;
     private final static float HEIGHT = 800;
     private final static float R = 25;
     private final static int BW = 50;
     private final static int BH = 50;
-    private final static int COUNT = 50;
+    private final static int COUNT = 100;
     private final static int DELAY = 10;
     private final static int RESOLUTION = 5;
     private final static int COLOR_TOLERANCE = 10;
